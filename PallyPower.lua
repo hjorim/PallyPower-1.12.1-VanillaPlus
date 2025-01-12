@@ -389,22 +389,22 @@ function PallyPower_ScanSpells()
             end
         end
 
-        local _, _, seal = string.find(spellName, PallyPower_SealSpellSearch)
-        if seal then
-            for id, name in PallyPower_SealID do
-                if (name == seal) then
-                    local _, _, rank = string.find(spellRank, PallyPower_RankSearch);
-                    if (RankInfo[id] and spellRank < RankInfo[id]["rank"]) then
-                    else
-                        RankInfo[id] = {};
-                        RankInfo[id]["rank"] = rank;
-                        RankInfo[id]["id"] = i;
-                        RankInfo[id]["name"] = name;
-                        RankInfo[id]["talent"] = 0;
-                    end
-                end
-            end
-        end
+        -- local _, _, seal = string.find(spellName, PallyPower_SealSpellSearch)
+        -- if seal then
+        --     for id, name in PallyPower_SealID do
+        --         if (name == seal) then
+        --             local _, _, rank = string.find(spellRank, PallyPower_RankSearch);
+        --             if (RankInfo[id] and spellRank < RankInfo[id]["rank"]) then
+        --             else
+        --                 RankInfo[id] = {};
+        --                 RankInfo[id]["rank"] = rank;
+        --                 RankInfo[id]["id"] = i;
+        --                 RankInfo[id]["name"] = name;
+        --                 RankInfo[id]["talent"] = 0;
+        --             end
+        --         end
+        --     end
+        -- end
 
         i = i + 1
     end
