@@ -42,6 +42,14 @@ PallyPower_ClassTexture[6] = "Interface\\AddOns\\PallyPower\\Icons\\Mage";
 PallyPower_ClassTexture[7] = "Interface\\AddOns\\PallyPower\\Icons\\Warlock";
 PallyPower_ClassTexture[8] = "Interface\\AddOns\\PallyPower\\Icons\\Shaman";
 PallyPower_ClassTexture[9] = "Interface\\AddOns\\PallyPower\\Icons\\Pet";
+PallyPower_ClassTexture[10] = "Interface\\AddOns\\PallyPower\\Icons\\Judgement";
+
+-- SealIcon = {};
+-- SealIcon[0] = "Interface\\Icons\\ability_thunderbolt";
+-- SealIcon[1] = "Interface\\Icons\\spell_holy_righteousnessaura";
+-- SealIcon[2] = "Interface\\Icons\\spell_holy_healingaura";
+-- SealIcon[3] = "Interface\\Icons\\spell_holy_sealofwrath";
+-- SealIcon[4] = "Interface\\Icons\\spell_holy_holysmite";
 
 LastCast = {};
 LastCastOn = {};
@@ -78,7 +86,6 @@ function PallyPower_OnLoad()
     SlashCmdList["PALLYPOWER"] = function(msg)
         PallyPower_SlashCommandHandler(msg)
     end
-
 end
 
 function PallyPower_OnUpdate(tdiff)
@@ -108,6 +115,7 @@ end
 function PallyPower_OnEvent(event)
     local type, id;
     if (event == "SPELLS_CHANGED" or event == "PLAYER_ENTERING_WORLD") then
+        --PallyPower_ScanSpells()
       if (RegularBlessingOption == true) then
         RegularBlessings = true
         BlessingIcon[0] = "Interface\\Icons\\Spell_Holy_SealOfWisdom";
@@ -193,12 +201,12 @@ function PallyPowerGrid_Update()
     -- Pally 1 is always player
     local i = 1;
     local numPallys = 0
-    local name, skills
+    local name, blessings
     if PallyPowerFrame:IsVisible() then
         PallyPowerFrame:SetScale(PP_PerUser.scalemain);
-        for name, skills in AllPallys do
+        for name, blessings in AllPallys do
             getglobal("PallyPowerFramePlayer" .. i .. "Name"):SetText(name)
-            getglobal("PallyPowerFramePlayer" .. i .. "Symbols"):SetText(skills["symbols"])
+            getglobal("PallyPowerFramePlayer" .. i .. "Symbols"):SetText(blessings["symbols"])
             getglobal("PallyPowerFramePlayer" .. i .. "Symbols"):SetTextColor(1, 1, 0.5)
             if (PallyPower_CanControl(name)) then
                 getglobal("PallyPowerFramePlayer" .. i .. "Name"):SetTextColor(1, 1, 1)
@@ -210,12 +218,12 @@ function PallyPowerGrid_Update()
                 end
             end
             for id = 0, 5 do
-                if (skills[id]) then
+                if (blessings[id]) then
                     getglobal("PallyPowerFramePlayer" .. i .. "Icon" .. id):Show()
                     getglobal("PallyPowerFramePlayer" .. i .. "Skill" .. id):Show()
-                    local txt = skills[id]["rank"];
-                    if (skills[id]["talent"] + 0 > 0) then
-                        txt = txt .. "+" .. skills[id]["talent"]
+                    local txt = blessings[id]["rank"];
+                    if (blessings[id]["talent"] + 0 > 0) then
+                        txt = txt .. "+" .. blessings[id]["talent"]
                     end
                     getglobal("PallyPowerFramePlayer" .. i .. "Skill" .. id):SetText(txt)
                 else
@@ -380,6 +388,24 @@ function PallyPower_ScanSpells()
                 end
             end
         end
+
+        local _, _, seal = string.find(spellName, PallyPower_SealSpellSearch)
+        if seal then
+            for id, name in PallyPower_SealID do
+                if (name == seal) then
+                    local _, _, rank = string.find(spellRank, PallyPower_RankSearch);
+                    if (RankInfo[id] and spellRank < RankInfo[id]["rank"]) then
+                    else
+                        RankInfo[id] = {};
+                        RankInfo[id]["rank"] = rank;
+                        RankInfo[id]["id"] = i;
+                        RankInfo[id]["name"] = name;
+                        RankInfo[id]["talent"] = 0;
+                    end
+                end
+            end
+        end
+
         i = i + 1
     end
 
@@ -549,7 +575,7 @@ function PallyPower_ParseMessage(sender, msg)
             if (not PallyPower_Assignments[name]) then
                 PallyPower_Assignments[name] = {}
             end
-            class = class .. 0
+            class = class + 0
             skill = skill + 0
             PallyPower_Assignments[name][class] = skill;
             PallyPower_UpdateUI()
@@ -666,7 +692,7 @@ end
 
 function PallyPower_PerformCycleBackwards(name, class)
 
-    shift = IsShiftKeyDown()
+    local shift = IsShiftKeyDown()
 
     if not PallyPower_Assignments[name][class] then
         currentBuffSelection = 6
@@ -699,7 +725,7 @@ end
 
 function PallyPower_PerformCycle(name, class)
 
-    shift = IsShiftKeyDown()
+    local shift = IsShiftKeyDown()
 
     if not PallyPower_Assignments[name][class] then
         currentBuffSelection = -1
